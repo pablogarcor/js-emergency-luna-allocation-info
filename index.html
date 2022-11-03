@@ -77,6 +77,12 @@
             const txs=await this.getTxs()
             const transferTxs=txs.filter(tx=>tx.logs[0]?.events.reduce((isTransfer,currentEvent)=>isTransfer||(currentEvent.type==="transfer"),false))
             console.log(transferTxs)
+            const bigTransferTxs=transferTxs.filter(tx=>tx.logs[0]?.events.reduce((isBigTransfer,currentEvent)=>isBigTransfer||(currentEvent.type==="transfer"?currentEvent.attributes.reduce((isBigTransfer,currentAttr)=>currentAttr.key==="amount"?((parseInt(currentAttr.value.replace("uluna",""),10)/100000)>10000):isBigTransfer,false):false),false))
+            console.log(bigTransferTxs)
+            const receivers = bigTransferTxs.map(tx=>tx.logs[0].events.reduce((receiverAddr, currentEvent)=>currentEvent.type==="transfer"?currentEvent.attributes.reduce((receiverAddr,currentAttr)=>currentAttr.key==="recipient"?currentAttr.value:receiverAddr,null):receiverAddr),null)
+            console.log(receivers)
+            const uniqReceivers = [...new Set(receivers)];
+            console.log(uniqReceivers)
         }
        async getTxs()
         {
