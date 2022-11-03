@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #dddddd;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
     <meta charset="UTF-8">
     <title>Inicio</title>
 </head>
@@ -10,7 +31,36 @@
 <button onclick="new Transaction().getTransferTxs()">Get all txs</button>
 <br />
 <button onclick="new Transaction().delete()">Delete sesión</button>
+<table id="table">
+    <thead>
+        <tr>
+            <th>Wallet</th>
+            <th>Amount received</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <tr>
+            <td>
+                Loading
+            </td>
+            <td>
+                Loading
+            </td>
+        </tr>
+    </tbody>
+
+</table>
 <script>
+    function loadTableData(items) {
+        const table = document.getElementById("tableBody");
+        items.forEach( item => {
+            let row = table.insertRow();
+            let addr = row.insertCell(0);
+            addr.innerHTML = item.addr;
+            let amount = row.insertCell(1);
+            amount.innerHTML = item.amount;
+        });
+    }
     class Request
     {
         attributes = null;
@@ -70,12 +120,20 @@
             const txs=await this.getTxs()
             const transferTxs=txs.filter(tx=>tx.logs[0]?.events.reduce((isTransfer,currentEvent)=>isTransfer||(currentEvent.type==="transfer"),false))
             console.log(transferTxs)
-            const bigTransferTxs=transferTxs.filter(tx=>tx.logs[0]?.events.reduce((isBigTransfer,currentEvent)=>isBigTransfer||(currentEvent.type==="transfer"?currentEvent.attributes.reduce((isBigTransfer,currentAttr)=>currentAttr.key==="amount"?((parseInt(currentAttr.value.replace("uluna",""),10)/100000)>10000):isBigTransfer,false):false),false))
+            const totalAmount = transferTxs.reduce((totalAmount, currentTx)=>totalAmount + currentTx.logs[0].events.reduce((amount, currentEvent)=>currentEvent.type==="transfer"?currentEvent.attributes.reduce((amount,currentAttr)=> (currentAttr.key === "amount" && currentAttr.value!=="") ? (parseInt(currentAttr.value.replace("uluna", ""), 10) / 1000000) : amount,0):amount,0),0)
+            console.log(totalAmount)
+            const bigTransferTxs=transferTxs.filter(tx=>tx.logs[0]?.events.reduce((isBigTransfer,currentEvent)=>isBigTransfer||(currentEvent.type==="transfer"?currentEvent.attributes.reduce((isBigTransfer,currentAttr)=>currentAttr.key==="amount"?((parseInt(currentAttr.value.replace("uluna",""),10)/1000000)>10000):isBigTransfer,false):false),false))
             console.log(bigTransferTxs)
-            const receivers = bigTransferTxs.map(tx=>tx.logs[0].events.reduce((receiverAddr, currentEvent)=>currentEvent.type==="transfer"?currentEvent.attributes.reduce((receiverAddr,currentAttr)=>currentAttr.key==="recipient"?currentAttr.value:receiverAddr,null):receiverAddr),null)
+            const receivers = bigTransferTxs.map(tx=>tx.logs[0].events.reduce((receiverAddr, currentEvent)=>currentEvent.type==="transfer"?currentEvent.attributes.reduce((receiverAddr,currentAttr)=>currentAttr.key==="recipient"?currentAttr.value:receiverAddr,null):receiverAddr,null),null)
             console.log(receivers)
             const uniqReceivers = [...new Set(receivers)];
             console.log(uniqReceivers)
+            const amountAndAddr = transferTxs.map(tx=>({addr:tx.logs[0].events.reduce((receiverAddr,currentEvent)=>currentEvent.type==="transfer"?currentEvent.attributes.reduce((receiverAddr,currentAttr)=>currentAttr.key==="recipient"?currentAttr.value:receiverAddr,null):receiverAddr,null),amount:tx.logs[0].events.reduce((amount,currentEvent)=>currentEvent.type==="transfer"?currentEvent.attributes.reduce((amount,currentAttr)=>(currentAttr.key==="amount" && currentAttr.value!=="")?(parseInt(currentAttr.value.replace("uluna", ""), 10) / 1000000):amount,0):amount,0)}))
+            console.log(amountAndAddr)
+            const amountPerAddr = uniqReceivers.map(addr=>({addr,amount:amountAndAddr.reduce((totalAmount,currentAddr)=>totalAmount + (currentAddr.addr===addr?currentAddr.amount:0),0)}))
+            console.log(amountPerAddr)
+            const sortedAddressByAmount=amountPerAddr.sort((a,b)=>b.amount-a.amount)
+            console.log(sortedAddressByAmount)
         }
        async getTxs()
         {
