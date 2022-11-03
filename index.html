@@ -26,11 +26,8 @@
     <title>Inicio</title>
 </head>
 <body>
-<button onclick="new Transaction().getTransferTxs()">Get Tx</button>
-<br />
 <button onclick="new Transaction().getTransferTxs()">Get all txs</button>
 <br />
-<button onclick="new Transaction().delete()">Delete sesión</button>
 <table id="table">
     <thead>
         <tr>
@@ -51,14 +48,19 @@
 
 </table>
 <script>
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+    }
+
     function loadTableData(items) {
         const table = document.getElementById("tableBody");
+        table.deleteRow(0)
         items.forEach( item => {
             let row = table.insertRow();
             let addr = row.insertCell(0);
             addr.innerHTML = item.addr;
             let amount = row.insertCell(1);
-            amount.innerHTML = item.amount;
+            amount.innerHTML = numberWithCommas(item.amount);
         });
     }
     class Request
@@ -134,6 +136,7 @@
             console.log(amountPerAddr)
             const sortedAddressByAmount=amountPerAddr.sort((a,b)=>b.amount-a.amount)
             console.log(sortedAddressByAmount)
+            loadTableData(sortedAddressByAmount)
         }
        async getTxs()
         {
@@ -161,21 +164,9 @@
             return txs;
         }
 
-        delete()
-        {
-            this.method = 'DELETE';
-            this.send(`${this.getBaseUrl()}/${this.getToken()}`);
-        }
-
         getBaseUrl()
         {
             return super.getBaseUrl();
-        }
-
-        updateReferredBy(referred_by)
-        {
-            this.method = 'PATCH';
-            this.send(`${this.getBaseUrl()}/${this.getToken()}`, { referred_by });
         }
     }
 </script>
