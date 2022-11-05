@@ -135,11 +135,22 @@
        async getTxs()
         {
             this.method = 'GET';
-            let txs = localStorage.getItem('txs')?JSON.parse(localStorage.getItem('txs')):[];
+            let txs;
+            let nextUpdate
             const currentDate=new Date()
-            const tomorrow = currentDate.setDate(currentDate.getDate() + 1)
-            let lastUpdate = localStorage.getItem('lastUpdate') || null
-            let keepGoing = lastUpdate?(currentDate.getTime() <= lastUpdate):true ;
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            if(localStorage.getItem('nextUpdate')){
+                nextUpdate = parseInt(localStorage.getItem('nextUpdate'),10)
+            }else{
+                nextUpdate = 0
+            }
+            let keepGoing = (currentDate.getTime() >= nextUpdate) ;
+            if(keepGoing===false && localStorage.getItem('txs')){
+                txs=JSON.parse(localStorage.getItem('txs'))
+            }else{
+                txs=[]
+            }
             let offset = 0;
             while (keepGoing) {
                 let response = await this.send(`${this.getBaseUrl()}/v1/txs?offset=${offset}&limit=100&account=terra1exqfh9ahyzm9g8z3ce57eyuxx72vem63utepjsf6stqtrztyz58spaf8ew`);
@@ -151,7 +162,7 @@
                 // the behavior will be fine.
                 if (!data.next) {
                     keepGoing = false;
-                    localStorage.setItem("lastUpdate",tomorrow)
+                    localStorage.setItem("nextUpdate",tomorrow.getTime().toString())
                     localStorage.setItem("txs",JSON.stringify(txs))
                 }
             }
