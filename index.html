@@ -170,6 +170,13 @@
             return txs;
         }
 
+        objectToBase64(obj){
+            return btoa(JSON.stringify(obj))
+        }
+        base64ToObject(base64){
+            return JSON.parse(atob(base64))
+        }
+
         getFcdBaseUrl()
         {
             return super.getFcdBaseUrl();
