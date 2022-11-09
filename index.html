@@ -122,7 +122,6 @@
     {
         async getProposalTxs(){
             const txs=await this.getProposals()
-            debugger
             const transferTxs=txs.filter(tx=>tx.logs[0]?.events.reduce((isTransfer,currentEvent)=>isTransfer||(currentEvent.type==="transfer"),false))
             // const totalAmount = transferTxs.reduce((totalAmount, currentTx)=>totalAmount + currentTx.logs[0].events.reduce((amount, currentEvent)=>currentEvent.type==="transfer"?currentEvent.attributes.reduce((amount,currentAttr)=> (currentAttr.key === "amount" && currentAttr.value!=="") ? (parseInt(currentAttr.value.replace("uluna", ""), 10) / 1000000) : amount,0):amount,0),0)
             // const bigTransferTxs=transferTxs.filter(tx=>tx.logs[0]?.events.reduce((isBigTransfer,currentEvent)=>isBigTransfer||(currentEvent.type==="transfer"?currentEvent.attributes.reduce((isBigTransfer,currentAttr)=>currentAttr.key==="amount"?((parseInt(currentAttr.value.replace("uluna",""),10)/1000000)>10000):isBigTransfer,false):false),false))
@@ -186,6 +185,7 @@
             this.method = 'GET';
             let txs;
             let nextUpdate
+            let keepGoing=true
             const currentDate=new Date()
             const tomorrow = new Date()
             tomorrow.setDate(tomorrow.getDate() + 1)
@@ -194,7 +194,9 @@
             }else{
                 nextUpdate = 0
             }
-            let keepGoing = !(((currentDate.getTime() >= nextUpdate) && localStorage.getItem('proposals'))) ;
+            if (localStorage.getItem('proposals')){
+                keepGoing = (currentDate.getTime() >= nextUpdate) ;
+            }
             if(keepGoing===false && localStorage.getItem('proposals')){
                 txs=JSON.parse(localStorage.getItem('proposals'))
             }else{
