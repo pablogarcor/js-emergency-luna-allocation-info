@@ -35,10 +35,14 @@
         <tr>
             <th>Wallet</th>
             <th>Amount received</th>
+            <th>Titles</th>
         </tr>
     </thead>
     <tbody id="tableBody">
         <tr>
+            <td>
+                Loading
+            </td>
             <td>
                 Loading
             </td>
@@ -57,6 +61,20 @@
     }
 
     function loadTableData(items) {
+        const table = document.getElementById("tableBody");
+        table.deleteRow(0)
+        items.forEach( item => {
+            let row = table.insertRow();
+            let addr = row.insertCell(0);
+            addr.innerHTML = item.addr;
+            let amount = row.insertCell(1);
+            amount.innerHTML = numberWithCommas(item.amount);
+            let title = row.insertCell(2);
+            title.innerHTML = item.titles;
+            title.style.whiteSpace = "pre-wrap"
+        });
+    }
+    function loadProposalTableData(items) {
         const table = document.getElementById("tableBody");
         table.deleteRow(0)
         items.forEach( item => {
@@ -126,8 +144,9 @@
             const executedProposalsInfo=executedProposals.map((proposal)=>({description:proposal.description,title:proposal.title,bank:proposal.msgs.reduce((bank,current)=>({...current?.bank})??bank, null)}))
             const receivers = executedProposalsInfo.map(proposal=>proposal.bank.send.to_address)
             const uniqReceivers = [...new Set(receivers)];
-            const amountAndAddr= executedProposalsInfo.map(proposal=>({addr:proposal.bank.send.to_address,amount:(parseInt(proposal.bank.send.amount[0].amount,10)/1000000)}))
-            const amountPerAddr = uniqReceivers.map(addr=>({addr,amount:amountAndAddr.reduce((totalAmount,currentAddr)=>totalAmount + (currentAddr.addr===addr?currentAddr.amount:0),0)}))
+            const amountAndAddrAndDescriptions= executedProposalsInfo.map(proposal=>({addr:proposal.bank.send.to_address,amount:(parseInt(proposal.bank.send.amount[0].amount,10)/1000000), title:proposal.title}))
+            const amountPerAddr = uniqReceivers.map(addr=>({addr,amount:amountAndAddrAndDescriptions.reduce((totalAmount,currentAddr)=>totalAmount + (currentAddr.addr===addr?currentAddr.amount:0),0),titles:amountAndAddrAndDescriptions.reduce((concatTitles,current)=>(current.addr===addr?concatTitles.concat(current.title,"\n"):concatTitles),"")}))
+            debugger
             const sortedAddressByAmount=amountPerAddr.sort((a,b)=>b.amount-a.amount)
             loadTableData(sortedAddressByAmount)
         }
