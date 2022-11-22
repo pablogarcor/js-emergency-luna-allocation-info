@@ -51,10 +51,38 @@
     </tbody>
 
 </table>
+<table id="validatorsTable">
+    <thead>
+    <tr>
+        <th>Wallet</th>
+        <th>Amount received (LUNA)</th>
+        <th>Titles</th>
+    </tr>
+    </thead>
+
+    <tbody id="validatorsTableBody">
+    <tr>
+        <td>
+            Loading
+        </td>
+        <td>
+            Loading
+        </td>
+        <td>
+            Loading
+        </td>
+    </tr>
+    </tbody>
+
+</table>
 <script type="module">
     import {Tx} from "./modules/tx.js";
+    const newTx = new Tx
+    document.addEventListener('DOMContentLoaded',()=> {
+        newTx.getProposalTxs()
+        newTx.getValidatorsTxs()
+    })
 
-    document.addEventListener('DOMContentLoaded',()=>new Tx().getProposalTxs())
 </script>
 </body>
 </html>

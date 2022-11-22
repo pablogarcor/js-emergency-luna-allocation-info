@@ -1,8 +1,14 @@
 import {Request} from "./request.js";
-import {loadTableData} from "./utils.js";
+import {loadTableData, loadValidatorsTableData} from "./utils.js";
 
 export class Tx extends Request
 {
+    async getValidatorsTxs(){
+        const validators=await this.getValidators();
+        const validatorsDescription=validators.map((validator)=>({...validator.description,tokens:(parseInt(validator.tokens,10)/1000000)}));
+        const validatorsSorted=validatorsDescription.sort((a,b)=>b.tokens-a.tokens)
+        loadValidatorsTableData(validatorsSorted)
+    }
     async getProposalTxs(){
         const proposals=await this.getProposals();
         const executedProposals=proposals.filter((proposal)=>proposal.status==="executed");
@@ -103,6 +109,44 @@ export class Tx extends Request
             }
         }
         return txs;
+    }
+
+    async getValidators()
+    {
+        this.method = 'GET';
+        let validators;
+        let nextUpdateValidators
+        let keepGoing=true;
+        const currentDate=new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if(localStorage.getItem('nextUpdateValidators')){
+            nextUpdateValidators = parseInt(localStorage.getItem('nextUpdateValidators'),10);
+        }else{
+            nextUpdateValidators = 0;
+        }
+        if (localStorage.getItem('validators')){
+            keepGoing = (currentDate.getTime() >= nextUpdateValidators) ;
+        }
+        if(keepGoing===false && localStorage.getItem('validators')){
+            validators=JSON.parse(localStorage.getItem('validators'));
+        }else{
+            validators=[];
+        }
+        let keyString = '';
+        while (keepGoing) {
+            let response = await this.send(`${this.getLcdBaseUrl()}/cosmos/staking/v1beta1/validators?${keyString}pagination.limit=999`)
+            let data = await response.json();
+            validators.push.apply(validators, data.validators);
+            let key=data?.pagination?.next_key
+            keyString = key?`pagination.key=${key}&`:'';
+            if (data.pagination?.next_key===null) {
+                keepGoing = false;
+                localStorage.setItem("nextUpdateValidators",tomorrow.getTime().toString());
+                localStorage.setItem("validators",JSON.stringify(validators));
+            }
+        }
+        return validators;
     }
 
     objectToBase64(obj){
