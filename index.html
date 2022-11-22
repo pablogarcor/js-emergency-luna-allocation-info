@@ -2,85 +2,32 @@
 <html lang="en">
 <head>
     <style>
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #dddddd;
-        }
-
-        tr:nth-child(even) {
-            background-color: #dddddd;
+        button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
         }
     </style>
     <meta charset="UTF-8">
     <title>Inicio</title>
 </head>
 <body>
+<button id="emergencyButton">Go to emergency fund data</button>
 <br />
-<table id="table">
-    <thead>
-        <tr>
-            <th>Wallet</th>
-            <th>Amount received (LUNA)</th>
-            <th>Titles</th>
-        </tr>
-    </thead>
-
-    <tbody id="tableBody">
-        <tr>
-            <td>
-                Loading
-            </td>
-            <td>
-                Loading
-            </td>
-            <td>
-                Loading
-            </td>
-        </tr>
-    </tbody>
-
-</table>
-<table id="validatorsTable">
-    <thead>
-    <tr>
-        <th>Wallet</th>
-        <th>Amount received (LUNA)</th>
-        <th>Titles</th>
-    </tr>
-    </thead>
-
-    <tbody id="validatorsTableBody">
-    <tr>
-        <td>
-            Loading
-        </td>
-        <td>
-            Loading
-        </td>
-        <td>
-            Loading
-        </td>
-    </tr>
-    </tbody>
-
-</table>
-<script type="module">
-    import {Tx} from "./modules/tx.js";
-    const newTx = new Tx
-    document.addEventListener('DOMContentLoaded',()=> {
-        newTx.getProposalTxs()
-        newTx.getValidatorsTxs()
+<br />
+<button id="validatorsButton">Go to emergency validators data</button>
+<script>
+    document.addEventListener('click',(e)=>{
+        if(e.target.id==="emergencyButton"){
+            location.href='emergency.html'
+        }else if(e.target.id==="validatorsButton"){
+            location.href='validators.html'
+        }
     })
 
 </script>

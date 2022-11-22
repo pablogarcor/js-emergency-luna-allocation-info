@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #dddddd;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Validators</title>
+</head>
+<body>
+<br />
+<table id="validatorsTable">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Contact</th>
+        <th>Tokens staked</th>
+    </tr>
+    </thead>
+
+    <tbody id="validatorsTableBody">
+    <tr>
+        <td>
+            Loading
+        </td>
+        <td>
+            Loading
+        </td>
+        <td>
+            Loading
+        </td>
+    </tr>
+    </tbody>
+
+</table>
+<script type="module">
+    import {Tx} from "./modules/tx.js";
+    const newTx = new Tx
+    document.addEventListener('DOMContentLoaded',()=> newTx.getValidatorsTxs())
+
+</script>
+</body>
+</html>
