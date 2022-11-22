@@ -32,7 +32,7 @@
     <thead>
         <tr>
             <th>Wallet</th>
-            <th>Amount received</th>
+            <th>Amount received (LUNA)</th>
             <th>Titles</th>
         </tr>
     </thead>
@@ -65,7 +65,6 @@
         const tableBody = document.getElementById("tableBody");
         const tbody = document.createElement('tbody');
         tbody.setAttribute('id','tableBody');
-        table.deleteRow(0);
         items.forEach( item => {
             let row = tbody.insertRow();
             let addr = row.insertCell(0);
