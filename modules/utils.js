@@ -39,3 +39,28 @@ export function loadValidatorsTableData(items) {
     });
     table.replaceChild(tbody,tableBody);
 }
+
+export function loadSpentGovTableData(items) {
+    const table = document.getElementById('govTable')
+    const tableBody = document.getElementById("govTableBody");
+    const tbody = document.createElement('tbody');
+    tbody.setAttribute('id','govTableBody');
+    items.forEach( item => {
+        let row = tbody.insertRow();
+        if(item.status==="PROPOSAL_STATUS_PASSED"){
+            row.style.backgroundColor="rgba(0, 255, 0, 0.6)"
+        }else if(item.status==="PROPOSAL_STATUS_REJECTED"){
+            row.style.backgroundColor="rgba(255, 0, 0, 0.5)"
+        }else{
+            row.style.backgroundColor="rgba(255,165,0, 0.5)"
+        }
+        let addr = row.insertCell(0);
+        addr.innerHTML = item.proposal_id;
+        let amount = row.insertCell(1);
+        amount.innerHTML = item.content.title;
+        let title = row.insertCell(2);
+        title.innerHTML = numberWithCommas((parseInt(item.content.amount[0].amount,10)/1000000));
+        title.style.whiteSpace = "pre-wrap";
+    });
+    table.replaceChild(tbody,tableBody);
+}

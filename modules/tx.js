@@ -1,8 +1,14 @@
 import {Request} from "./request.js";
-import {loadTableData, loadValidatorsTableData} from "./utils.js";
+import {loadSpentGovTableData, loadTableData, loadValidatorsTableData} from "./utils.js";
 
 export class Tx extends Request
 {
+    async getSpendGovProposals(){
+        const proposals=await this.getGovProposals();
+        const spentProposals = proposals.filter(proposal=>proposal.content['@type']==="/cosmos.distribution.v1beta1.CommunityPoolSpendProposal")
+        const sortedSpentProposals = spentProposals.sort((a,b)=>parseInt(b.proposal_id,10)-parseInt(a.proposal_id,10))
+        loadSpentGovTableData(sortedSpentProposals)
+    }
     async getValidatorsTxs(){
         const validators=await this.getValidators();
         const validatorsDescription=validators.map((validator)=>({...validator.description,tokens:(parseInt(validator.tokens,10)/1000000)}));
@@ -175,7 +181,6 @@ export class Tx extends Request
             let response = await this.send(`${this.getLcdBaseUrl()}/cosmos/gov/v1beta1/proposals?${keyString}`)
             let data = await response.json();
             govProposals.push.apply(govProposals, data.proposals);
-            debugger
             let key=data?.pagination?.next_key
             keyString = key?`pagination.key=${key}`:'';
             if (data.pagination?.next_key===null) {
