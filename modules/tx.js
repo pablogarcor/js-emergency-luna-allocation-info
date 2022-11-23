@@ -148,6 +148,44 @@ export class Tx extends Request
         }
         return validators;
     }
+    async getGovProposals()
+    {
+        this.method = 'GET';
+        let govProposals;
+        let nextUpdateGovProposals
+        let keepGoing=true;
+        const currentDate=new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if(localStorage.getItem('nextUpdateGovProposals')){
+            nextUpdateGovProposals = parseInt(localStorage.getItem('nextUpdateGovProposals'),10);
+        }else{
+            nextUpdateGovProposals = 0;
+        }
+        if (localStorage.getItem('govProposals')){
+            keepGoing = (currentDate.getTime() >= nextUpdateGovProposals) ;
+        }
+        if(keepGoing===false && localStorage.getItem('govProposals')){
+            govProposals=JSON.parse(localStorage.getItem('govProposals'));
+        }else{
+            govProposals=[];
+        }
+        let keyString = '';
+        while (keepGoing) {
+            let response = await this.send(`${this.getLcdBaseUrl()}/cosmos/gov/v1beta1/proposals?${keyString}`)
+            let data = await response.json();
+            govProposals.push.apply(govProposals, data.proposals);
+            debugger
+            let key=data?.pagination?.next_key
+            keyString = key?`pagination.key=${key}`:'';
+            if (data.pagination?.next_key===null) {
+                keepGoing = false;
+                localStorage.setItem("nextUpdateGovProposals",tomorrow.getTime().toString());
+                localStorage.setItem("govProposals",JSON.stringify(govProposals));
+            }
+        }
+        return govProposals;
+    }
 
     objectToBase64(obj){
         return btoa(JSON.stringify(obj));
